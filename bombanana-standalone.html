@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bombanana: Defuse Team</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1117;--fg:#e6edf3;--mut:#8b949e;--pan:#161b22;--bd:#30363d;--cy:#22d3ee;--ye:#facc15;--pk:#f472b6;--rd:#ef4444;--gr:#22c55e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{color-scheme:dark;height:100%}
+body{margin:0;min-height:100dvh;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none;background:var(--bg);color:var(--fg);font-family:'Rubik',system-ui,sans-serif;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--bd);background:#0b0f14;gap:8px;flex-wrap:wrap}
+h1{margin:0;font-size:20px;font-weight:900;color:var(--ye);letter-spacing:2px}
+#badge{display:none;font-size:12px;color:var(--mut);gap:12px;align-items:center}
+#badge b{color:var(--cy)}
+a.lnk,button.lnk{background:none;border:0;color:var(--rd);text-decoration:underline;cursor:pointer;font:inherit}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:12px}
+.panel{background:rgba(22,27,34,.9);border:1px solid var(--bd);border-radius:20px;padding:16px;box-shadow:0 8px 30px #0008}
+.screen{display:none;width:100%}
+#s-lobby{max-width:480px;text-align:center}
+#s-lobby h2{margin:0 0 4px;font-size:28px}
+.mut{color:var(--mut);font-size:13px}
+input{width:100%;background:#010409;border:1px solid var(--bd);border-radius:12px;padding:12px;text-align:center;font:700 22px 'Share Tech Mono',monospace;color:var(--cy);letter-spacing:4px;text-transform:uppercase;margin:6px 0 14px}
+.role{display:flex;gap:12px;align-items:center;width:100%;text-align:right;background:var(--pan);border:1px solid var(--bd);border-radius:16px;padding:12px;margin-bottom:10px;color:var(--fg);font:inherit;cursor:pointer}
+.role:hover:not(:disabled){border-color:var(--cy)}
+.role:disabled{opacity:.4;cursor:not-allowed}
+.role .ic{font-size:28px;width:48px;height:48px;border-radius:12px;background:#0d1117;display:flex;align-items:center;justify-content:center}
+.role b{font-size:17px;display:block}
+.role small{color:var(--mut);font-size:12px}
+#net{margin-top:10px;font-size:12px;color:var(--mut)}
+#s-bomb{max-width:900px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.leds{display:flex;gap:6px}
+.led{width:28px;height:28px;border-radius:8px;border:2px solid var(--bd);background:#010409;color:#444;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.led.on{background:var(--rd);border-color:#fca5a5;color:#fff;box-shadow:0 0 12px var(--rd)}
+#timer{font:900 46px 'Share Tech Mono',monospace;color:var(--rd);text-shadow:0 0 12px #ef4444aa;background:#000;border:1px solid #7f1d1d;border-radius:16px;padding:2px 20px}
+.btn{background:#21262d;border:1px solid var(--bd);color:#c9d1d9;border-radius:12px;padding:8px 14px;font:inherit;font-size:12px;cursor:pointer}
+.btn.big{background:var(--gr);color:#031;font-weight:900;font-size:20px;padding:12px 30px;border:0}
+#casing{position:relative;transition:box-shadow .2s}
+#casing.flash{box-shadow:0 0 0 4px var(--rd),0 0 40px var(--rd)}
+#bomb{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){#bomb{grid-template-columns:1fr}}
+body.charlie #bomb{filter:grayscale(1) contrast(1.2)}
+body.tofi #bomb{pointer-events:none}
+.mod{background:#0d1117;border:1px solid var(--bd);border-radius:16px;padding:12px;min-height:260px;display:flex;flex-direction:column;justify-content:space-between;transition:border-color .3s}
+.mod.ok{border-color:var(--gr);box-shadow:inset 0 0 20px #22c55e33}
+.mod .hd{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
+.dot{width:12px;height:12px;border-radius:50%;background:#444}
+.mod.ok .dot{background:var(--gr);box-shadow:0 0 8px var(--gr)}
+svg path.w{cursor:pointer;transition:opacity .3s}
+svg path.cut{opacity:.15;stroke-dasharray:4 12}
+.mid{display:flex;flex-direction:column;align-items:center;gap:14px;margin:auto}
+#strip{width:70px;height:12px;border-radius:6px;background:#222;border:1px solid #555;transition:background .1s}
+#bbtn{width:116px;height:116px;border-radius:50%;border:4px solid #fff5;font:900 22px 'Rubik';cursor:pointer;touch-action:none;box-shadow:0 6px 20px #0008}
+#bbtn:active{transform:scale(.94)}
+.syms{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:auto 0}
+.sym{background:var(--pan);border:1px solid var(--bd);border-radius:12px;font-size:36px;padding:14px;cursor:pointer}
+.sym:active{transform:scale(.9)}
+.prog{display:flex;gap:6px;justify-content:center}
+.prog i{width:10px;height:10px;border-radius:50%;background:#333}.prog i.on{background:var(--pk)}
+.hint{text-align:center;font-size:10px;color:var(--mut)}
+#veil{position:absolute;inset:0;border-radius:20px;background:#010409e6;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;z-index:5;padding:16px}
+#veil h2{margin:0;font-size:34px}
+#s-bamba{max-width:720px}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.ans button{padding:22px 8px;border-radius:18px;font:900 28px 'Rubik';cursor:pointer;color:#fff}
+.yes{background:#16a34a55;border:2px solid var(--gr)}.no{background:#dc262655;border:2px solid var(--rd)}
+.ans button:active{transform:scale(.95)}
+#manual{max-height:58vh;overflow:auto;font-size:13px;line-height:1.7}
+#manual h4{margin:14px 0 4px;font-size:16px}
+#manual .r{background:#0d1117;border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:6px 0}
+#sig{position:fixed;top:64px;left:50%;transform:translate(-50%,-20px);opacity:0;transition:.25s;z-index:99;pointer-events:none;padding:12px 32px;border-radius:18px;font:900 30px 'Rubik';border:3px solid}
+#sig.show{opacity:1;transform:translate(-50%,0)}
+#sig.y{background:#052e16;border-color:var(--gr);color:#86efac}#sig.n{background:#450a0a;border-color:var(--rd);color:#fca5a5}
+</style>
+</head>
+<body>
+<header>
+<h1>BOMBANANA <span class="mut" style="letter-spacing:0">סודי ביותר</span></h1>
+<div id="badge" style="display:none">חדר: <b id="b-code">--</b> תפקיד: <b id="b-role" style="color:var(--ye)">--</b> <button class="lnk" onclick="leave()">יציאה</button></div>
+</header>
+<div id="sig"></div>
+
+<main>
+<section id="s-lobby" class="screen panel" style="display:block">
+<h2>נטרול פצצה קבוצתי</h2>
+<p class="mut">שלושה שחקנים נכנסים לאותו קוד חדר, כל אחד בוחר תפקיד אחר</p>
+<label class="mut">קוד חדר</label>
+<input id="code" value="BOMB1" maxlength="8" oninput="codeChanged()">
+<button class="role" id="r-charlie" onclick="pick('charlie')"><span class="ic">👁️</span><span><b style="color:var(--cy)">צ׳רלי (האופרטור)</b><small>רואה את הפצצה בשחור-לבן, והיחיד שמבצע פעולות</small></span></button>
+<button class="role" id="r-tofi" onclick="pick('tofi')"><span class="ic">👂</span><span><b style="color:var(--ye)">טופי (בקרת איכות)</b><small>רואה את הפצצה בצבעים מלאים, לא יכולה ללחוץ, רק להנחות</small></span></button>
+<button class="role" id="r-bamba" onclick="pick('bamba')"><span class="ic">🗣️</span><span><b style="color:var(--pk)">במבה (המוח)</b><small>מחזיקה בחוברת. אסור לדבר, עונה רק 👍 כן / 👎 לא</small></span></button>
+<div id="net">מתחבר…</div>
+</section>
+
+<section id="s-bomb" class="screen">
+<div class="panel top">
+<div style="display:flex;align-items:center;gap:8px"><span class="mut">פסילות:</span><div class="leds"><div class="led">X</div><div class="led">X</div><div class="led">X</div></div></div>
+<div id="timer">05:00</div>
+<button class="btn" onclick="reqReset()">🔄 איפוס משחק</button>
+</div>
+<div id="casing" class="panel">
+<div id="bomb">
+<div class="mod" id="m-w"><div class="hd"><span style="color:var(--cy)">מודול 1: חוטי חשמל</span><span class="dot"></span></div>
+<svg viewBox="0 0 200 120" style="width:100%;height:170px">
+<path class="w" id="w0" d="M20 20 Q100 40 180 20" fill="none" stroke-width="9" stroke-linecap="round" onclick="clickWire(0)"/>
+<path class="w" id="w1" d="M20 45 Q100 10 180 45" fill="none" stroke-width="9" stroke-linecap="round" onclick="clickWire(1)"/>
+<path class="w" id="w2" d="M20 70 Q100 90 180 70" fill="none" stroke-width="9" stroke-linecap="round" onclick="clickWire(2)"/>
+<path class="w" id="w3" d="M20 95 Q100 60 180 95" fill="none" stroke-width="9" stroke-linecap="round" onclick="clickWire(3)"/>
+</svg><div class="hint">חתוך את החוט הנכון לפי החוברת</div></div>
+
+<div class="mod" id="m-b"><div class="hd"><span style="color:var(--ye)">מודול 2: הכפתור</span><span class="dot"></span></div>
+<div class="mid"><div id="strip"></div>
+<button id="bbtn" onpointerdown="btnDown(event)" onpointerup="btnUp()" onpointercancel="btnUp()" oncontextmenu="return false">לחץ</button></div>
+<div class="hint">טפיחה קצרה או החזקה ושחרור, לפי החוברת</div></div>
+
+<div class="mod" id="m-s"><div class="hd"><span style="color:var(--pk)">מודול 3: קוד סמלים</span><span class="dot"></span></div>
+<div class="syms"><button class="sym" onclick="clickSym(0)"></button><button class="sym" onclick="clickSym(1)"></button><button class="sym" onclick="clickSym(2)"></button><button class="sym" onclick="clickSym(3)"></button></div>
+<div class="prog"><i></i><i></i><i></i><i></i></div></div>
+</div>
+<div id="veil"></div>
+</div>
+</section>
+
+<section id="s-bamba" class="screen">
+<div class="panel" style="border-color:#f472b688;margin-bottom:12px;text-align:center">
+<div class="mut" style="color:var(--pk);margin-bottom:8px">לוח תגובות אילם (אסור לדבר!)</div>
+<div class="ans"><button class="yes" onclick="signal(true)">👍 כן</button><button class="no" onclick="signal(false)">👎 לא</button></div>
+<div class="mut" id="bstat"></div></div>
+<div class="panel" id="manual">
+<h3 style="margin:0;color:var(--ye)">📖 מדריך נטרול פצצות (סודי ביותר)</h3>
+<p class="mut">הצוות מתאר לך את הפצצה בקול ושואל שאלות כן/לא. בדקי בחוברת ועני בלחיצה בלבד. בכל המודולים הכללים נבדקים לפי הסדר, והראשון שמתאים הוא הקובע.</p>
+
+<h4 style="color:var(--cy)">מודול 1: חוטי חשמל (4 חוטים, סופרים מלמעלה)</h4>
+<div class="r"><b>1.</b> יש יותר מחוט כחול אחד ← חותכים את <b>החוט הכחול האחרון</b>.</div>
+<div class="r"><b>2.</b> החוט הרביעי צהוב ואין אף חוט אדום ← חותכים את <b>החוט הראשון</b>.</div>
+<div class="r"><b>3.</b> יש בדיוק חוט אדום אחד ← חותכים את <b>החוט השני</b>.</div>
+<div class="r"><b>4.</b> בכל מקרה אחר ← חותכים את <b>החוט הרביעי</b>.</div>
+<p class="mut">צ׳רלי שואל "לחתוך את חוט מספר X?" וענייך 👍 רק אם זה החוט הנכון.</p>
+
+<h4 style="color:var(--ye)">מודול 2: הכפתור</h4>
+<div class="r"><b>טפיחה:</b> אם הכתובת על הכפתור היא <b>"עצור"</b> או שהכפתור <b>אדום</b> ← לוחצים ומשחררים מיד (פחות מחצי שנייה).</div>
+<div class="r"><b>החזקה:</b> בכל מקרה אחר ← מחזיקים את הכפתור. מופיע פס אור בצד, ומשחררים כשהספרה האחרונה של השניות בטיימר היא:<br>פס <b>כחול</b> ← 4 &nbsp;|&nbsp; פס <b>צהוב</b> ← 5 &nbsp;|&nbsp; כל צבע אחר ← 1</div>
+<p class="mut">ענייך 👍 כשצ׳רלי שואל "לשחרר עכשיו?" והספרה נכונה.</p>
+
+<h4 style="color:var(--pk)">מודול 3: קוד סמלים</h4>
+<div class="r">הסדר הנכון ללחיצה (סמל אחרי סמל):<br><span style="font-size:26px;letter-spacing:10px">⚓ ⭐ 🛡️ 🔑</span></div>
+<p class="mut">מיקום הסמלים על הלוח משתנה בכל משחק. כשצ׳רלי שואל "הסמל הזה הבא?", ענייך 👍 רק אם זה הסמל הבא ברצף. טעות מאפסת את הרצף ומוסיפה פסילה.</p>
+
+<h4>כללי המשחק</h4>
+<div class="r">5 דקות, 3 פסילות. מנטרלים את שלושת המודולים לפני שהזמן נגמר.</div>
+</div>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const COL={red:'#ef4444',blue:'#3b82f6',yellow:'#eab308',white:'#f1f5f9'};
+const CN={red:'אדום',blue:'כחול',yellow:'צהוב',white:'לבן'};
+const ORDER=['⚓','⭐','🛡️','🔑'];
+const NAMES={charlie:'צ׳רלי',tofi:'טופי',bamba:'במבה'};
+const ME=Math.random().toString(36).slice(2,10);
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let role=null,G=null,recvAt=0,pressAt=0,lastStrikes=0;
+
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const code=()=>($('#code').value.trim().toUpperCase()||'BOMB1');
+
+/* ---------- game rules (shared with the manual) ---------- */
+function wireTarget(w){
+  const bl=w.map((c,i)=>c==='blue'?i:-1).filter(i=>i>=0);
+  if(bl.length>1)return bl[bl.length-1];
+  if(w[3]==='yellow'&&!w.includes('red'))return 0;
+  if(w.filter(c=>c==='red').length===1)return 1;
+  return 3;
+}
+const isTap=g=>g.label==='עצור'||g.btnCol==='red';
+const relDigit=g=>g.strip==='blue'?4:g.strip==='yellow'?5:1;
+function freshGame(){
+  const cols=Object.keys(COL);
+  return{status:'wait',t:300000,strikes:0,held:false,
+    wires:[0,1,2,3].map(()=>rnd(cols)),cut:[0,0,0,0],
+    btnCol:rnd(cols),label:rnd(['לחץ','עצור','החזק','פוצץ']),strip:rnd(cols),
+    syms:shuffle(ORDER),step:0,mods:{w:0,b:0,s:0},dl:0};
+}
+
+/* ---------- networking: PeerJS star topology (charlie = host) ---------- */
+let peer=null,hostConn=null,conns={};
+const hostId=()=>'bombanana-'+code().toLowerCase().replace(/[^a-z0-9]/g,'');
+function codeChanged(){}
+function send(topic,data){
+  const m={topic,data:data||{}};
+  try{
+    if(role==='charlie')Object.values(conns).forEach(c=>{if(c.open)c.send(m)});
+    else if(hostConn&&hostConn.open)hostConn.send(m);
+  }catch(e){}
+}
+function onMsg(topic,d,from){
+  if(topic==='state'&&role&&role!=='charlie'){G=d.s;recvAt=Date.now();render();}
+  else if(topic==='sig'){
+    if(role==='charlie')Object.entries(conns).forEach(([r,c])=>{if(r!==from&&c.open)c.send({topic,data:d})});
+    if(role)showSig(d.v);
+  }
+  else if(topic==='hello'&&role==='charlie')sendState();
+  else if(topic==='reset'&&role==='charlie'){G=freshGame();render();sendState();}
+  else if(topic==='deny'){const r=role;leave();alert('התפקיד '+NAMES[r]+' כבר תפוס בחדר הזה');}
+}
+function startHost(){
+  peer=new Peer(hostId());
+  peer.on('error',e=>{
+    if(e.type==='unavailable-id'){leave();alert('צ׳רלי כבר קיים בחדר הזה. בחרו קוד חדר אחר או תפקיד אחר.');}
+    else if(e.type!=='peer-unavailable'){$('#veil').innerHTML='<h2>שגיאת רשת</h2><div class="mut">'+e.type+'</div>';$('#veil').style.display='flex';}
+  });
+  peer.on('disconnected',()=>{try{peer.reconnect()}catch(x){}});
+  peer.on('connection',c=>{
+    c.on('data',m=>{
+      if(m.topic==='join'){
+        const r=m.data&&m.data.role;
+        if(!['tofi','bamba'].includes(r)||(conns[r]&&conns[r].open)){c.send({topic:'deny',data:{}});setTimeout(()=>c.close(),400);return;}
+        conns[r]=c;c._role=r;render();sendState();return;
+      }
+      onMsg(m.topic,m.data,c._role);
+    });
+    c.on('close',()=>{if(c._role&&conns[c._role]===c){delete conns[c._role];render();}});
+  });
+}
+function startClient(){
+  peer=new Peer();
+  peer.on('open',connectHost);
+  peer.on('error',e=>{});
+  peer.on('disconnected',()=>{try{peer.reconnect()}catch(x){}});
+}
+function connectHost(){
+  if(!role||role==='charlie'||!peer||!peer.open)return;
+  if(hostConn&&hostConn.open)return;
+  try{hostConn&&hostConn.close()}catch(x){}
+  const c=peer.connect(hostId(),{reliable:true});
+  hostConn=c;
+  c.on('open',()=>{c.send({topic:'join',data:{role}});});
+  c.on('data',m=>onMsg(m.topic,m.data));
+  c.on('close',()=>{if(hostConn===c){G=null;render();}});
+}
+function playersLine(){
+  const n=Object.keys(conns).filter(r=>conns[r].open).map(r=>NAMES[r]);
+  return '<div class="mut">מחוברים: צ׳רלי'+(n.length?' ,'+n.join(' ,'):'')+' ('+(n.length+1)+'/3)</div>';
+}
+
+/* ---------- role / screens ---------- */
+let wake=null;
+async function pick(r){
+  if(typeof Peer==='undefined'){alert('לא נטענה ספריית החיבור. בדקו חיבור לאינטרנט ורעננו.');return;}
+  role=r;document.body.className=r;conns={};hostConn=null;
+  $('#code').disabled=true;
+  $('#badge').style.display='flex';$('#b-code').textContent=code();$('#b-role').textContent=NAMES[r];
+  $$('.screen').forEach(s=>s.style.display='none');
+  $(r==='bamba'?'#s-bamba':'#s-bomb').style.display='block';
+  try{wake=await navigator.wakeLock.request('screen')}catch(e){}
+  if(r==='charlie'){G=freshGame();render();startHost();startLoop();}
+  else{G=null;render();startClient();window._retry=setInterval(connectHost,3000);}
+}
+function leave(){
+  clearInterval(window._retry);
+  try{peer&&peer.destroy()}catch(e){}
+  try{wake&&wake.release()}catch(e){}
+  peer=null;hostConn=null;conns={};role=null;G=null;document.body.className='';
+  $('#code').disabled=false;$('#badge').style.display='none';
+  $$('.screen').forEach(s=>s.style.display='none');$('#s-lobby').style.display='block';
+}
+
+/* ---------- charlie: authoritative engine ---------- */
+function sendState(){if(role==='charlie'&&G){const s=Object.assign({},G);s.t=curT();send('state',{s});}}
+function startLoop(){
+  if(window._loop)return;
+  let last=0;
+  window._loop=setInterval(()=>{
+    if(role==='charlie'&&G&&G.status==='run'&&curT()<=0){G.t=0;end('lost');}
+    if(role)renderTimer();
+    const n=Date.now();if(n-last>=1000){last=n;sendState();}
+  },100);
+}
+function curT(){
+  if(!G)return 300000;
+  if(G.status!=='run')return G.t;
+  return role==='charlie'?G.dl-Date.now():G.t-(Date.now()-recvAt);
+}
+function startGame(){
+  if(role!=='charlie')return;
+  G=Object.assign(freshGame(),{status:'run',dl:Date.now()+300000});
+  G.wires=G.wires; render();sendState();
+}
+function end(st){G.t=Math.max(0,curT());G.status=st;G.held=false;render();sendState();}
+function strike(){
+  G.strikes++;
+  if(G.strikes>=3)return end('lost');
+  render();sendState();
+}
+function checkWin(){if(G.mods.w&&G.mods.b&&G.mods.s)end('won');else{render();sendState();}}
+function live(){return role==='charlie'&&G&&G.status==='run';}
+function clickWire(i){
+  if(!live()||G.cut[i])return;
+  G.cut[i]=1;
+  if(i===wireTarget(G.wires)){G.mods.w=1;checkWin();}else strike();
+}
+function clickSym(i){
+  if(!live()||G.mods.s)return;
+  if(G.syms[i]===ORDER[G.step]){G.step++;if(G.step===4){G.mods.s=1;checkWin();return;}render();sendState();}
+  else{G.step=0;strike();}
+}
+function btnDown(e){
+  if(!live()||G.mods.b)return;
+  try{e.target.setPointerCapture(e.pointerId)}catch(x){}
+  pressAt=Date.now();G.held=true;render();sendState();
+}
+function btnUp(){
+  if(!live()||!G.held)return;
+  const dur=Date.now()-pressAt;G.held=false;
+  if(isTap(G)){
+    if(dur<500){G.mods.b=1;checkWin();}else strike();
+  }else{
+    const digit=Math.ceil(curT()/1000)%10;
+    if(dur>=700&&digit===relDigit(G)){G.mods.b=1;checkWin();}else strike();
+  }
+}
+function reqReset(){
+  if(role==='charlie'){G=freshGame();render();sendState();}
+  else send('reset');
+}
+
+/* ---------- bamba ---------- */
+function signal(v){send('sig',{v});showSig(v);}
+let sigT;
+function showSig(v){
+  const s=$('#sig');s.className='show '+(v?'y':'n');s.textContent=v?'👍 כן!':'👎 לא!';
+  clearTimeout(sigT);sigT=setTimeout(()=>s.className='',2500);
+}
+
+/* ---------- rendering ---------- */
+function fmt(ms){const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function renderTimer(){
+  if(role==='bamba'||!G){return;}
+  const t=curT();$('#timer').textContent=fmt(t);
+  $('#timer').style.color=t<30000?'#ff2a2a':'#ef4444';
+}
+function render(){
+  if(role==='bamba'){
+    $('#bstat').textContent=G?(G.status==='run'?'⏱ '+fmt(G.t)+' | פסילות: '+G.strikes+'/3':G.status==='wait'?'ממתינים להתחלה':G.status==='won'?'🎉 הפצצה נוטרלה!':'💥 הפצצה התפוצצה'):'ממתינים לצ׳רלי…';
+    return;
+  }
+  if(!role)return;
+  const veil=$('#veil'),cas=$('#casing');
+  if(!G){veil.style.display='flex';veil.innerHTML='<h2>⏳ ממתינים לצ׳רלי…</h2><div class="mut">צ׳רלי מנהל את הפצצה, חכו שייכנס לחדר</div>';return;}
+  renderTimer();
+  $$('.led').forEach((l,i)=>l.classList.toggle('on',i<G.strikes));
+  if(G.strikes>lastStrikes){cas.classList.add('flash');setTimeout(()=>cas.classList.remove('flash'),500);}
+  lastStrikes=G.strikes;
+  G.wires.forEach((c,i)=>{const p=$('#w'+i);p.setAttribute('stroke',COL[c]);p.classList.toggle('cut',!!G.cut[i]);});
+  const b=$('#bbtn');b.style.background=COL[G.btnCol];b.style.color=G.btnCol==='white'||G.btnCol==='yellow'?'#111':'#fff';b.textContent=G.label;
+  const st=$('#strip');st.style.background=G.held?COL[G.strip]:'#222';st.style.boxShadow=G.held?'0 0 14px '+COL[G.strip]:'none';
+  $$('.sym').forEach((s,i)=>s.textContent=G.syms[i]);
+  $$('.prog i').forEach((d,i)=>d.classList.toggle('on',i<G.step||G.mods.s));
+  $('#m-w').classList.toggle('ok',!!G.mods.w);$('#m-b').classList.toggle('ok',!!G.mods.b);$('#m-s').classList.toggle('ok',!!G.mods.s);
+  if(G.status==='run'){veil.style.display='none';}
+  else{
+    veil.style.display='flex';
+    const again=role==='charlie'?'<button class="btn big" onclick="startGame()">'+(G.status==='wait'?'▶ התחל משחק':'▶ משחק חדש')+'</button>':'<div class="mut">ממתינים שצ׳רלי יתחיל…</div>';
+    const head=G.status==='won'?'<h2 style="color:var(--gr)">🎉 הפצצה נוטרלה!</h2>':G.status==='lost'?'<h2 style="color:var(--rd)">💥 בום! הפצצה התפוצצה</h2>':'<h2>מוכנים?</h2>'+(role==='charlie'?playersLine():'<div class="mut">צ׳רלי לוחץ להתחלה</div>')+'';
+    veil.innerHTML=head+again;
+  }
+}
+$('#net').textContent=typeof Peer==='undefined'?'🔴 לא נטענה ספריית החיבור':'🟢 מוכן. כולם פותחים את אותו קישור, מקלידים אותו קוד חדר ובוחרים תפקיד. צ׳רלי נכנס ראשון.';
+</script>
+</body>
+</html>
